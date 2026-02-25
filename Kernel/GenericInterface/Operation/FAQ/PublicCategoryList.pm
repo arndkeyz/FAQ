@@ -86,7 +86,9 @@ sub Run {
     my ( $Self, %Param ) = @_;
 
     # Set UserID to root because in public interface there is no user.
-    my $CategoryTree = $Kernel::OM->Get('Kernel::System::FAQ')->GetPublicCategoriesLongNames(
+    my $FAQObject = $Kernel::OM->Get('Kernel::System::FAQ');
+
+    my $CategoryTree = $FAQObject->GetPublicCategoriesLongNames(
         Valid  => 1,
         Type   => 'rw',
         UserID => 1,
@@ -110,6 +112,17 @@ sub Run {
             ID   => $Key,
             Name => $CategoryTree->{$Key},
         );
+
+        # get additional category comment
+        my %CategoryData = $FAQObject->CategoryGet(
+            CategoryID => $Key,
+            UserID     => 1,
+        );
+
+        if ( %CategoryData && defined $CategoryData{Comment} && $CategoryData{Comment} ne '' ) {
+            $Category{Comment} = $CategoryData{Comment};
+        }
+
         push @PublicCategoryList, {%Category};
     }
 
